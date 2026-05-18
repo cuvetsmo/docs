@@ -1,0 +1,17 @@
+name = "cuvetsmo-docs"
+compatibility_date = "2026-05-19"
+
+# Pure static site served via Workers Static Assets binding.
+# Astro Starlight builds to `dist/` — Cloudflare serves that as static
+# assets at the edge, no Worker runtime invoked for normal page loads.
+#
+# This wrangler.toml exists so the CF Pages "auto-config" prompt
+# (wrangler asks "modify settings? configure for Astro with astro add
+# cloudflare?") gets a non-interactive answer and skips adding the
+# @astrojs/cloudflare adapter — which we DON'T want for a pure-static
+# docs site (adapter switches Astro to server mode, breaks expressive-
+# code virtual modules during dependency optimization).
+
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"

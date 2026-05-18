@@ -1,16 +1,16 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import rehypeMermaid from 'rehype-mermaid';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://docs.cuvetsmo.com',
-	markdown: {
-		// Render Mermaid code-fence blocks to inline SVG at build time
-		// (uses Playwright Chromium under the hood via mermaid-isomorphic)
-		rehypePlugins: [[rehypeMermaid, { strategy: 'inline-svg' }]],
-	},
+	// 2026-05-19: removed rehype-mermaid (mermaid-isomorphic needs Playwright
+	// Chromium at build time · CF Pages build env doesn't have it). Diagrams
+	// now render as code blocks — readable as text, not pretty. Future fix:
+	// add a Starlight plugin that does client-side mermaid render (mermaid.js
+	// in browser), trading ~50KB JS for diagrams that render without build
+	// dependencies.
 	integrations: [
 		starlight({
 			title: 'CUVETSMO Docs',
