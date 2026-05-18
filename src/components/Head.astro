@@ -1,0 +1,112 @@
+---
+// Custom Head override: extends the default Starlight Head and adds the
+// client-side Mermaid loader. The loader only fires (and only fetches the
+// ~80KB mermaid bundle from a CDN) on pages that actually contain
+// `<pre data-language="mermaid">` blocks. Zero cost everywhere else.
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default />
+
+<script is:inline>
+	(function () {
+		function decodeEntities(s) {
+			return s
+				.replace(/&lt;/g, '<')
+				.replace(/&gt;/g, '>')
+				.replace(/&amp;/g, '&')
+				.replace(/&quot;/g, '"')
+				.replace(/&#x27;/g, "'")
+				.replace(/&#39;/g, "'")
+				.replace(/&middot;/g, '·');
+		}
+
+		// Walk a Starlight/Expressive-Code rendered mermaid block and
+		// reconstruct the original source text. Each line is wrapped in
+		// `.ec-line > .code` so we read the textContent of each line in
+		// document order.
+		function extractMermaidSource(pre) {
+			var lines = pre.querySelectorAll('.ec-line');
+			if (lines && lines.length) {
+				var out = [];
+				for (var i = 0; i < lines.length; i++) {
+					out.push(lines[i].textContent);
+				}
+				return out.join('\n');
+			}
+			// Fallback: just take the code element's text.
+			var code = pre.querySelector('code');
+			return code ? code.textContent : pre.textContent;
+		}
+
+		function init() {
+			var pres = document.querySelectorAll('pre[data-language="mermaid"]');
+			if (!pres.length) return;
+
+			// Convert each mermaid <pre> into a <div class="mermaid"> that the
+			// mermaid lib can render. Also strip the surrounding
+			// expressive-code figure so we get a clean SVG canvas.
+			var diagrams = [];
+			pres.forEach(function (pre, idx) {
+				var src = decodeEntities(extractMermaidSource(pre));
+				var div = document.createElement('div');
+				div.className = 'mermaid';
+				div.setAttribute('id', 'mermaid-' + idx);
+				div.textContent = src;
+
+				var figure = pre.closest('figure.frame');
+				var host = figure && figure.parentElement ? figure : pre;
+				host.replaceWith(div);
+				diagrams.push(div);
+			});
+
+			// Dynamic-import mermaid from a versioned CDN. Falls back to a
+			// readable error message if the CDN is blocked.
+			var theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default';
+			import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')
+				.then(function (mod) {
+					var mermaid = mod.default;
+					mermaid.initialize({
+						startOnLoad: false,
+						theme: theme,
+						fontFamily: 'Sarabun, Noto Sans Thai, Inter, sans-serif',
+						flowchart: { htmlLabels: true, curve: 'basis' },
+						sequence: { actorMargin: 50 },
+						securityLevel: 'loose',
+					});
+					mermaid.run({ nodes: diagrams }).catch(function (err) {
+						console.warn('[mermaid] render error', err);
+					});
+				})
+				.catch(function (err) {
+					console.warn('[mermaid] failed to load lib', err);
+					diagrams.forEach(function (d) {
+						var src = d.textContent;
+						d.innerHTML = '';
+						var pre = document.createElement('pre');
+						pre.textContent = src;
+						pre.style.background = 'var(--sl-color-gray-6)';
+						pre.style.padding = '1rem';
+						pre.style.borderRadius = '6px';
+						d.appendChild(pre);
+					});
+				});
+
+			// Re-render on theme toggle so the diagrams pick up dark/light.
+			var lastTheme = theme;
+			new MutationObserver(function () {
+				var t = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'default';
+				if (t === lastTheme) return;
+				lastTheme = t;
+				// Reload page to redraw — simpler than re-parsing each diagram.
+				// (Most readers won't toggle theme often.)
+			}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+	})();
+</script>

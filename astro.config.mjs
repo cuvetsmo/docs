@@ -2,20 +2,18 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
+const SITE = 'https://docs.cuvetsmo.com';
+const OG_IMAGE = `${SITE}/og.png`;
+const DESCRIPTION =
+	'เอกสารพัฒนา WebCUVETSMO — architecture, developer onboarding, succession guide สำหรับ Vet 87/88/89 และ open-source contributors.';
+
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://docs.cuvetsmo.com',
-	// 2026-05-19: removed rehype-mermaid (mermaid-isomorphic needs Playwright
-	// Chromium at build time · CF Pages build env doesn't have it). Diagrams
-	// now render as code blocks — readable as text, not pretty. Future fix:
-	// add a Starlight plugin that does client-side mermaid render (mermaid.js
-	// in browser), trading ~50KB JS for diagrams that render without build
-	// dependencies.
+	site: SITE,
 	integrations: [
 		starlight({
 			title: 'CUVETSMO Docs',
-			description:
-				'เอกสารพัฒนาเว็บสโมสรนิสิตสัตวแพทย์ จุฬาฯ · WebCUVETSMO architecture · developer onboarding · succession guide',
+			description: DESCRIPTION,
 			logo: {
 				src: './public/smo-logo.png',
 				alt: 'CUVETSMO',
@@ -25,6 +23,26 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/cuvetsmo/docs/edit/main/',
 			},
+			components: {
+				// Custom Head: extends Starlight default + adds a client-side
+				// Mermaid loader (loaded only on pages with mermaid code blocks).
+				Head: './src/components/Head.astro',
+				// Custom Footer: keeps Starlight pagination/edit-link/last-updated
+				// and appends a CUVETSMO site footer with project + tool links.
+				Footer: './src/components/Footer.astro',
+			},
+			head: [
+				// Open Graph image — shared across every page. The og.png is a
+				// static 1200x630 sky-gradient card with the CUVETSMO logo.
+				{ tag: 'meta', attrs: { property: 'og:image', content: OG_IMAGE } },
+				{ tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+				{ tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+				{ tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
+				{ tag: 'meta', attrs: { property: 'og:site_name', content: 'CUVETSMO Docs' } },
+				{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+				{ tag: 'meta', attrs: { name: 'twitter:image', content: OG_IMAGE } },
+				{ tag: 'meta', attrs: { name: 'theme-color', content: '#0369a1' } },
+			],
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/cuvetsmo' },
 				{ icon: 'external', label: 'cuvetsmo.com', href: 'https://cuvetsmo.com' },
@@ -47,6 +65,7 @@ export default defineConfig({
 				},
 				{ label: 'Onboarding', link: '/dev-onboard/' },
 				{ label: 'Succession Guide', link: '/successor/' },
+				{ label: 'Changelog', link: '/changelog/' },
 			],
 		}),
 	],

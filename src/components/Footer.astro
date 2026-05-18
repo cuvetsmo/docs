@@ -1,0 +1,163 @@
+---
+// Custom Footer override: keeps Starlight's built-in Footer (edit link,
+// pagination, last-updated) and appends a CUVETSMO site footer with
+// project links + tools + contact info. Bilingual Thai-mixed copy.
+import Default from '@astrojs/starlight/components/Footer.astro';
+const year = new Date().getFullYear();
+---
+
+<Default />
+
+<div class="cuvetsmo-footer not-content">
+	<div class="cuvetsmo-footer-inner">
+		<div class="cuvetsmo-footer-brand">
+			<img src="/smo-logo.png" alt="CUVETSMO" width="32" height="32" />
+			<div>
+				<strong>CUVETSMO Docs</strong>
+				<p>Built by students, for students — made in Bangkok</p>
+			</div>
+		</div>
+
+		<div class="cuvetsmo-footer-cols">
+			<div class="cuvetsmo-footer-col">
+				<h4>Project</h4>
+				<ul>
+					<li><a href="https://cuvetsmo.com" rel="noopener">cuvetsmo.com</a></li>
+					<li><a href="https://status.cuvetsmo.com" rel="noopener">status.cuvetsmo.com</a></li>
+					<li><a href="https://github.com/cuvetsmo" rel="noopener">github.com/cuvetsmo</a></li>
+				</ul>
+			</div>
+			<div class="cuvetsmo-footer-col">
+				<h4>Tools</h4>
+				<ul>
+					<li><a href="https://vetmock.vercel.app" rel="noopener">VetMock</a></li>
+					<li><a href="https://hanong.vercel.app" rel="noopener">Hanong</a></li>
+					<li><a href="https://cuvetsmo.com" rel="noopener">CUVETSMO Bot</a></li>
+				</ul>
+			</div>
+			<div class="cuvetsmo-footer-col">
+				<h4>Contact</h4>
+				<ul>
+					<li><a href="mailto:palm@cuvetsmo.com">palm@cuvetsmo.com</a></li>
+					<li><a href="https://instagram.com/cuvetsmo" rel="noopener">@cuvetsmo</a></li>
+					<li><a href="/.well-known/security.txt">security.txt</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="cuvetsmo-footer-copyright">
+		<span>Copyright {year} CUVETSMO</span>
+		<span class="cuvetsmo-footer-sep">|</span>
+		<a href="https://github.com/cuvetsmo/docs" rel="noopener">Docs source</a>
+	</div>
+</div>
+
+<style>
+	.cuvetsmo-footer {
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid var(--sl-color-gray-5);
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-sm);
+	}
+
+	.cuvetsmo-footer-inner {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2rem;
+		margin-bottom: 1.5rem;
+	}
+
+	@media (min-width: 640px) {
+		.cuvetsmo-footer-inner {
+			grid-template-columns: 1fr 2fr;
+			gap: 3rem;
+			align-items: start;
+		}
+	}
+
+	.cuvetsmo-footer-brand {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+	}
+
+	.cuvetsmo-footer-brand img {
+		flex-shrink: 0;
+		border-radius: 6px;
+	}
+
+	.cuvetsmo-footer-brand strong {
+		display: block;
+		color: var(--sl-color-white);
+		font-size: var(--sl-text-base);
+		font-weight: 600;
+	}
+
+	.cuvetsmo-footer-brand p {
+		margin: 0.25rem 0 0;
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-3);
+	}
+
+	.cuvetsmo-footer-cols {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.cuvetsmo-footer-col h4 {
+		margin: 0 0 0.5rem;
+		font-size: var(--sl-text-xs);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--sl-color-gray-2);
+	}
+
+	.cuvetsmo-footer-col ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.cuvetsmo-footer-col a {
+		color: var(--sl-color-gray-2);
+		text-decoration: none;
+		font-size: var(--sl-text-sm);
+	}
+
+	.cuvetsmo-footer-col a:hover {
+		color: var(--sl-color-accent-high);
+		text-decoration: underline;
+	}
+
+	.cuvetsmo-footer-copyright {
+		padding-top: 1rem;
+		border-top: 1px solid var(--sl-color-gray-6);
+		font-size: var(--sl-text-xs);
+		color: var(--sl-color-gray-4);
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.cuvetsmo-footer-copyright a {
+		color: var(--sl-color-gray-3);
+		text-decoration: none;
+	}
+
+	.cuvetsmo-footer-copyright a:hover {
+		color: var(--sl-color-accent-high);
+		text-decoration: underline;
+	}
+
+	.cuvetsmo-footer-sep {
+		color: var(--sl-color-gray-5);
+	}
+</style>

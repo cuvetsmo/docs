@@ -1,66 +1,86 @@
 ---
-title: Welcome to CUVETSMO Docs
-description: เอกสารพัฒนาเว็บสโมสรนิสิตสัตวแพทย์ จุฬาฯ · architecture · developer onboarding · annual succession guide.
+title: CUVETSMO Docs
+description: เอกสารพัฒนา WebCUVETSMO — architecture, developer onboarding, และ succession guide สำหรับ Vet 87/88/89 และ open-source contributors.
 template: splash
 hero:
   title: CUVETSMO Docs
-  tagline: เอกสารพัฒนาเว็บสโมสรนิสิตสัตวแพทย์ จุฬาฯ · architecture, onboarding, และ succession guide สำหรับ Vet 87/88/89 และผู้สนับสนุน open-source
+  tagline: เอกสารพัฒนา WebCUVETSMO — architecture, onboarding, succession. The developer wiki for the CU Vet student union web platform.
   image:
     file: ../../../public/smo-logo.png
+    alt: CUVETSMO logo
   actions:
-    - text: Start onboarding
-      link: /dev-onboard/
-      icon: right-arrow
-      variant: primary
-    - text: Read architecture
+    - text: Start with architecture
       link: /architecture/
-      icon: open-book
+      icon: setting
+      variant: primary
+    - text: Onboard new dev
+      link: /dev-onboard/
+      icon: rocket
+    - text: Visit cuvetsmo.com
+      link: https://cuvetsmo.com
+      icon: external
+      variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## ทำไมต้องมี docs site นี้
+## What is CUVETSMO?
 
-WebCUVETSMO เป็น web app ของสโมสรนิสิตคณะสัตวแพทยศาสตร์ จุฬาฯ — มี approval workflow · AI chat · ชมรม · event calendar · marketplace · และเป็นโครงสร้างที่ตั้งใจ **ส่งต่อให้คนรุ่นถัดไปดูแลได้จริง** ไม่ใช่แค่ Palm คนเดียว
+**CUVETSMO** — สโมสรนิสิตคณะสัตวแพทยศาสตร์ จุฬาฯ — เป็น student union ของคณะสัตวแพทย์ จุฬาฯ. **WebCUVETSMO** is the open-source web platform built by Palm (Vet 86) for the union — it handles the official 16-state project approval workflow, the 22 student clubs, the 12-month event calendar, AI chat, a marketplace, and more.
 
-เอกสารทั้ง 4 หน้าด้านล่างคือสิ่งที่ Vet 87 / 88 / 89 (หรือ open-source contributor คนใดก็ตาม) ควรอ่านก่อนแตะ codebase
+This site is the **developer wiki**: how the system is built, how to run it locally, how to ship your first PR, and how to hand it off to the next generation when you graduate. ไม่ใช่ user manual ของ end-user — สำหรับเรื่องนั้นไป [cuvetsmo.com](https://cuvetsmo.com)
 
 <CardGrid>
-  <Card title="Architecture" icon="setting">
-    Deep technical reference — data model, routes, RLS, edge functions, storage. ใช้เป็น single source of truth ของ schema และ system shape
-    
-    [Read architecture →](/architecture/)
-  </Card>
-  <Card title="SSO Design" icon="puzzle">
-    Design draft สำหรับ cross-app identity เชื่อม VetMock + Hanong + CUVETSMO — options, milestones, risks
-    
-    [Read SSO design →](/architecture-sso/)
-  </Card>
-  <Card title="Developer Onboarding" icon="rocket">
-    From zero to "first PR merged" in ~60 minutes. Pre-requisites, clone-and-run, first-feature exercise, pre-push checklist
-    
-    [Start onboarding →](/dev-onboard/)
-  </Card>
-  <Card title="Successor Guide" icon="seti:notebook">
-    Annual handover playbook — assets to inherit, mentorship cadence, critical decisions NOT to undo, break-glass recovery
-    
-    [Read successor guide →](/successor/)
-  </Card>
+	<LinkCard
+		title="Architecture"
+		href="/architecture/"
+		description="Deep technical reference — system overview, data model, RLS, edge functions, storage, 16-state workflow. The single source of truth for schema and system shape."
+	/>
+	<LinkCard
+		title="SSO Design"
+		href="/architecture-sso/"
+		description="Design draft for cross-app identity linking VetMock + Hanong + CUVETSMO. Options, milestones, risks, decisions log."
+	/>
+	<LinkCard
+		title="Developer Onboarding"
+		href="/dev-onboard/"
+		description="From zero to first PR merged in about 60 minutes. Pre-requisites, clone-and-run, first-feature exercise, pre-push checklist."
+	/>
+	<LinkCard
+		title="Successor Guide"
+		href="/successor/"
+		description="Annual handover playbook — assets to inherit, mentorship cadence, critical decisions not to undo, break-glass recovery steps."
+	/>
 </CardGrid>
 
-## Where these docs come from
+## Built for handover
 
-ทุกหน้าใน docs site นี้ถูก source มาจาก folder [`docs/` ของ WebCUVETSMO](https://github.com/palmzamak2547/WebCUVETSMO/tree/main/docs) — เป็น docs ที่ commit อยู่กับ codebase จริง ไม่ใช่เอกสารแยกที่หลุด sync ได้ง่าย
+WebCUVETSMO is intentionally documented so the **next IT lead can take it over fully** — not just keep it running, but extend it without Palm in the loop. Every page in this docs site is sourced from the [`docs/` folder of the WebCUVETSMO repo](https://github.com/palmzamak2547/WebCUVETSMO/tree/main/docs) so docs and code stay in sync.
 
-ถ้าเจอจุดที่ outdated หรืออยากเพิ่ม section ใหม่ — ใช้ปุ่ม **Edit page** ด้านล่างของแต่ละหน้าเพื่อเปิด PR ใน repo `cuvetsmo/docs`
+Found something outdated? Use the **Edit page** link at the bottom of any page to open a PR.
+
+<CardGrid>
+	<Card title="Open source" icon="seti:github">
+		MIT-licensed. Anyone can fork, contribute, or self-host. Source code at [palmzamak2547/WebCUVETSMO](https://github.com/palmzamak2547/WebCUVETSMO).
+	</Card>
+	<Card title="Modern stack" icon="seti:react">
+		React 19, Vite 6, TypeScript, Tailwind CSS 3, Supabase (Postgres + Auth + Storage + Edge Functions), React Router 6, PWA-ready.
+	</Card>
+	<Card title="Production grade" icon="approve-check">
+		Row-level security on every table, 16-state approval workflow, audit log, web push, Sentry error monitoring, automated CI on every PR.
+	</Card>
+	<Card title="Made for students" icon="heart">
+		Built by Vet 86, for Vet 87, 88, 89 — and beyond. Annual handover ritual in May–June keeps the lights on across cohorts.
+	</Card>
+</CardGrid>
 
 ## Quick links
 
-- **Production app**: [cuvetsmo.com](https://cuvetsmo.com)
-- **Source code (WebCUVETSMO)**: [github.com/palmzamak2547/WebCUVETSMO](https://github.com/palmzamak2547/WebCUVETSMO)
-- **Docs source (this site)**: [github.com/cuvetsmo/docs](https://github.com/cuvetsmo/docs)
-- **CUVETSMO org**: [github.com/cuvetsmo](https://github.com/cuvetsmo)
+- **Production app** — [cuvetsmo.com](https://cuvetsmo.com)
+- **Source code** — [github.com/palmzamak2547/WebCUVETSMO](https://github.com/palmzamak2547/WebCUVETSMO)
+- **Docs source** — [github.com/cuvetsmo/docs](https://github.com/cuvetsmo/docs)
+- **Parent org** — Faculty of Veterinary Science, Chulalongkorn University ([vet.chula.ac.th](https://www.vet.chula.ac.th))
 
 ---
 
-*Maintained by the SMO IT lead · current keeper: Palm Anuthin (Vet 86) · handover พฤษภาคม-มิถุนายน every year*
+*Maintained by the SMO IT lead. Current keeper: Palm Anuthin (Vet 86). Handover happens every May–June.*
