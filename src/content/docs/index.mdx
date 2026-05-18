@@ -1,0 +1,66 @@
+---
+title: Welcome to CUVETSMO Docs
+description: เอกสารพัฒนาเว็บสโมสรนิสิตสัตวแพทย์ จุฬาฯ · architecture · developer onboarding · annual succession guide.
+template: splash
+hero:
+  title: CUVETSMO Docs
+  tagline: เอกสารพัฒนาเว็บสโมสรนิสิตสัตวแพทย์ จุฬาฯ · architecture, onboarding, และ succession guide สำหรับ Vet 87/88/89 และผู้สนับสนุน open-source
+  image:
+    file: ../../../public/smo-logo.png
+  actions:
+    - text: Start onboarding
+      link: /dev-onboard/
+      icon: right-arrow
+      variant: primary
+    - text: Read architecture
+      link: /architecture/
+      icon: open-book
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## ทำไมต้องมี docs site นี้
+
+WebCUVETSMO เป็น web app ของสโมสรนิสิตคณะสัตวแพทยศาสตร์ จุฬาฯ — มี approval workflow · AI chat · ชมรม · event calendar · marketplace · และเป็นโครงสร้างที่ตั้งใจ **ส่งต่อให้คนรุ่นถัดไปดูแลได้จริง** ไม่ใช่แค่ Palm คนเดียว
+
+เอกสารทั้ง 4 หน้าด้านล่างคือสิ่งที่ Vet 87 / 88 / 89 (หรือ open-source contributor คนใดก็ตาม) ควรอ่านก่อนแตะ codebase
+
+<CardGrid>
+  <Card title="Architecture" icon="setting">
+    Deep technical reference — data model, routes, RLS, edge functions, storage. ใช้เป็น single source of truth ของ schema และ system shape
+    
+    [Read architecture →](/architecture/)
+  </Card>
+  <Card title="SSO Design" icon="puzzle">
+    Design draft สำหรับ cross-app identity เชื่อม VetMock + Hanong + CUVETSMO — options, milestones, risks
+    
+    [Read SSO design →](/architecture-sso/)
+  </Card>
+  <Card title="Developer Onboarding" icon="rocket">
+    From zero to "first PR merged" in ~60 minutes. Pre-requisites, clone-and-run, first-feature exercise, pre-push checklist
+    
+    [Start onboarding →](/dev-onboard/)
+  </Card>
+  <Card title="Successor Guide" icon="seti:notebook">
+    Annual handover playbook — assets to inherit, mentorship cadence, critical decisions NOT to undo, break-glass recovery
+    
+    [Read successor guide →](/successor/)
+  </Card>
+</CardGrid>
+
+## Where these docs come from
+
+ทุกหน้าใน docs site นี้ถูก source มาจาก folder [`docs/` ของ WebCUVETSMO](https://github.com/palmzamak2547/WebCUVETSMO/tree/main/docs) — เป็น docs ที่ commit อยู่กับ codebase จริง ไม่ใช่เอกสารแยกที่หลุด sync ได้ง่าย
+
+ถ้าเจอจุดที่ outdated หรืออยากเพิ่ม section ใหม่ — ใช้ปุ่ม **Edit page** ด้านล่างของแต่ละหน้าเพื่อเปิด PR ใน repo `cuvetsmo/docs`
+
+## Quick links
+
+- **Production app**: [cuvetsmo.com](https://cuvetsmo.com)
+- **Source code (WebCUVETSMO)**: [github.com/palmzamak2547/WebCUVETSMO](https://github.com/palmzamak2547/WebCUVETSMO)
+- **Docs source (this site)**: [github.com/cuvetsmo/docs](https://github.com/cuvetsmo/docs)
+- **CUVETSMO org**: [github.com/cuvetsmo](https://github.com/cuvetsmo)
+
+---
+
+*Maintained by the SMO IT lead · current keeper: Palm Anuthin (Vet 86) · handover พฤษภาคม-มิถุนายน every year*

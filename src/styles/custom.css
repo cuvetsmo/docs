@@ -1,0 +1,43 @@
+/* CUVETSMO Docs · brand palette */
+/* Primary brand color: sky-700 (#0369a1) — derived from SMO logo */
+
+:root {
+  /* Starlight uses --sl-color-accent for primary accent */
+  --sl-color-accent-low: #075985;   /* sky-800 — dark mode accent surface */
+  --sl-color-accent: #0369a1;       /* sky-700 — primary brand */
+  --sl-color-accent-high: #7dd3fc;  /* sky-300 — bright accent on dark */
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #e7e9ee;
+  --sl-color-gray-2: #c0c2c7;
+  --sl-color-gray-3: #888b96;
+  --sl-color-gray-4: #545861;
+  --sl-color-gray-5: #353841;
+  --sl-color-gray-6: #24272f;
+  --sl-color-black: #17181c;
+}
+
+/* Light mode override — keep sky-700 readable on light surface */
+:root[data-theme='light'] {
+  --sl-color-accent-low: #e0f2fe;   /* sky-100 */
+  --sl-color-accent: #0369a1;       /* sky-700 */
+  --sl-color-accent-high: #075985;  /* sky-800 */
+}
+
+/* Thai font stack — Sarabun looks cleanest at body sizes */
+:root {
+  --sl-font: 'Sarabun', 'Noto Sans Thai', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sl-font-system: var(--sl-font);
+  --sl-font-system-mono: ui-monospace, 'SFMono-Regular', 'JetBrains Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+}
+
+/* Mermaid diagrams — keep them readable on both themes */
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Site title sits next to logo — keep them aligned */
+.site-title {
+  font-weight: 700;
+}
