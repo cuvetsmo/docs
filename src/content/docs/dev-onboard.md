@@ -171,7 +171,21 @@ Before `git push` on any branch that will trigger CI:
 npm run test:smoke
 ```
 
-This runs the Playwright suite in `e2e/`. It expects the dev server on `localhost:5173` and a valid `.env.local`. If you don't have Playwright browsers installed, run `npx playwright install chromium` once.
+This runs the Playwright suite in `e2e/`. The Playwright config spins up its own Vite server on port 5273 (so it does NOT collide with `npm run dev` on 5173). If you don't have Playwright browsers installed, run `npx playwright install chromium` once.
+
+Current baseline: **19 passed / 4 skipped** in ~37s. The 4 skips are the `/chat intent routing` tests that need an authenticated session.
+
+To run the 4 authenticated `/chat` tests locally:
+
+```bash
+# 1. Sign in manually at http://localhost:5173/login (magic link is easiest)
+# 2. Capture the storage state
+npx playwright codegen --save-storage=auth.json http://localhost:5173
+# 3. Run the full suite with the captured state
+CHAT_AUTH_STATE=$PWD/auth.json npm run test:smoke
+```
+
+`auth.json` is gitignored. Don't commit it.
 
 ---
 
@@ -193,7 +207,7 @@ WebCUVETSMO/
 │   └── functions/           Edge Functions (Deno)
 ├── docs/                    you are here
 ├── e2e/                     Playwright smoke tests
-├── scripts/                 one-off helpers (seo-ping · google-indexing)
+├── scripts/                 one-off helpers (seo-ping · google-indexing · deploy-edge-function)
 ├── .mcp.json                MCP server config (gitignored when it has tokens)
 ├── tailwind.config.js       brand palette
 ├── vite.config.ts           build + PWA config

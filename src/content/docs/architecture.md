@@ -98,7 +98,12 @@ Every table in `public` has RLS enabled (verified live via `mcp__supabase-cuvets
 | `announcements` | Banner / homepage announcements | `published_by` | yes |
 | `ai_chat_conversations` | Persisted AI chat threads · per user | `user_id → profiles.id` | yes |
 | `ai_chat_messages` | Messages in each thread | `conversation_id` · `role` enum | yes |
-| `audit_log` | Append-only record of sensitive writes (role changes, schema edits via admin UI) | `actor_id` · `action` · `target_table` · `target_id` | yes |
+| `ai_chat_intent_logs` | Classifier decisions (0057 + 0059) · `surface` distinguishes `cuvetsmo-internal` vs `cuvetsmo-public` (ai.cuvetsmo.com) · 90-day retention | `user_id` · `intent_classified` · `classifier_mode` | yes |
+| `ai_chat_usage_logs` | Per-call token / provider / fallback observability (0061) · drives cost analysis · 90-day retention | `user_id` · `conversation_id` · `provider` · `is_fallback` | yes |
+| `ai_chat_rate_limit_buckets` | Rolling 24h rate-limit state (0058) · 1-day retention | `identifier` · `surface` · `window_start` | yes |
+| `short_link_clicks` | Per-click analytics for the short-link service · UTM + IP-hash · 90-day retention | `short_link_id → short_links.id` | yes |
+| `internal_secrets` | **Locked-down** key/value table (0063) · powers the `x-cron-secret` gate for `ig-harvest` · only `postgres` + `service_role` can read | key/value/description triple | yes (no public policies) |
+| `audit_log` | Append-only record of sensitive writes (role changes, schema edits via admin UI) · NO retention (security trail) | `actor_id` · `action` · `target_table` · `target_id` | yes |
 | `integration_tokens` | OAuth refresh tokens for Google Calendar push (per admin user) | `user_id` · `provider` · `refresh_token` (encrypted col) | yes |
 | `alumni_profiles` | Vet alumni directory (Phase 6 starter) | NEW · sparse use | yes |
 
@@ -234,22 +239,28 @@ Live function list (verified via `mcp__supabase-cuvetsmo__list_edge_functions`):
 |------|--------------|---------|--------------|
 | `notify-status-change` | true | Postgres webhook on UPDATE `projects` | Fan-out to LINE Messaging API + Discord webhook on status transitions |
 | `ai-chat` | true | Frontend POST from `/chat` | Proxies to Groq (Llama 3.3 70B) with OpenAlex tool calling for paper citations · streams SSE · provider chain Groq → Cerebras → OpenRouter fallback |
-| `ig-harvest` | true | `pg_cron` (3 schedules) | Scrapes public Instagram profile pages to refresh `ig_feed_cache` and `ig-thumbnails` storage bucket |
+| `ig-harvest` | true + `x-cron-secret` | `pg_cron` (3 schedules) | Scrapes public Instagram profile pages to refresh `ig_feed_cache` and `ig-thumbnails` storage bucket. **Dual-gated** (0063): the function rejects anything without the 64-char hex secret from `internal_secrets.cron_secret`. Fail-CLOSED with 503 if the secret is missing. Constant-time header compare. |
 | `clubs-logo-refresh` | false | Manual / admin-triggered | Refreshes the `clubs-logos` storage bucket from canonical sources (deployed on server but **source missing from repo** — flag for restoration) |
 | `google-oauth-callback` | true | Browser redirect from Google after consent | Exchanges authorization code for tokens · stores in `integration_tokens` |
 | `google-calendar-push` | true | Frontend action / admin trigger | Reads `integration_tokens` · pushes `events` rows to the admin's Google Calendar |
 
 ### Cron schedule (`cron.job`)
 
-Verified via `SELECT jobname, schedule FROM cron.job`:
+Verified via `SELECT jobname, schedule FROM cron.job` (7 jobs as of 2026-05-24):
 
-| Job | Schedule | URL |
-|-----|----------|-----|
-| `ig-harvest-cuvetography-priority` | `40 */6 * * *` (every 6h) | `/ig-harvest?handle=cuvetography` |
-| `ig-harvest-cuvetsmo-priority` | `10 */6 * * *` (every 6h, offset) | `/ig-harvest?handle=cuvetsmo` |
-| `ig-harvest-hourly` | `17 * * * *` (every hour at :17) | `/ig-harvest` (full sweep) |
+| Job | Schedule | Effect |
+|-----|----------|--------|
+| `ig-harvest-cuvetography-priority` | `40 */6 * * *` (every 6h) | POST `/ig-harvest?handle=cuvetography` with `x-cron-secret` header |
+| `ig-harvest-cuvetsmo-priority` | `10 */6 * * *` (every 6h, offset) | POST `/ig-harvest?handle=cuvetsmo` |
+| `ig-harvest-hourly` | `17 * * * *` (every hour at :17) | POST `/ig-harvest` (rotating handle pick) |
+| `log-retention-ai-chat-intent` | `15 4 * * *` (04:15 UTC) | `DELETE FROM ai_chat_intent_logs WHERE created_at < now() - 90d` |
+| `log-retention-ai-chat-usage` | `20 4 * * *` (04:20 UTC) | `DELETE FROM ai_chat_usage_logs WHERE created_at < now() - 90d` |
+| `log-retention-ai-chat-rate-limit` | `25 4 * * *` (04:25 UTC) | `DELETE FROM ai_chat_rate_limit_buckets WHERE window_start < now() - 1d` |
+| `log-retention-short-link-clicks` | `30 4 * * *` (04:30 UTC) | `DELETE FROM short_link_clicks WHERE clicked_at < now() - 90d` |
 
-> Note: the cron rows currently embed the anon JWT in plaintext as `Authorization` headers. This is acceptable because the anon key is public anyway, but rotating it requires rewriting the cron rows.
+> The ig-harvest cron rows embed both the anon JWT (public-by-design) and the **`internal_secrets.cron_secret`** value (private). Migration 0063 generates the secret with `gen_random_bytes(32)` and bakes it into the cron job string via `format()` at schedule-time. Rotate by re-applying 0063 with `ON CONFLICT DO UPDATE` if you ever need to invalidate a leaked secret.
+>
+> `audit_log` intentionally has **no retention job** — the security trail must be retained indefinitely.
 
 Source: `supabase/functions/`. One-off setup notes live alongside the function (e.g. `supabase/functions/notify-status-change/SETUP.md`).
 
@@ -273,19 +284,25 @@ This repo ships an `.mcp.json` so Claude Code / Cursor / any MCP-aware IDE can i
 
 ## 8. Storage buckets
 
-Listed live from `storage.buckets`:
+Listed live from `storage.buckets` (audit-hardened 2026-05-24 in 0062):
 
-| Bucket | Public | Purpose | RLS pattern |
-|--------|--------|---------|-------------|
-| `avatars` | yes | Profile photos · `<user_id>/avatar-<ts>.<ext>` | uploader = `auth.uid()` |
-| `clubs-logos` | yes | Club brand assets · `<slug>/logo.png` | admin/chair write |
-| `event-photos` | yes | Public photo gallery · `<event_id>/<filename>` | uploader must have `event_attendance` row |
-| `ig-thumbnails` | yes | Cached IG thumbnails populated by `ig-harvest` | service-role-only writes |
-| `project-documents` | yes | Receipts / photos / signed letters per project · `<project_id>/<uploader_id>/<file>` | uploader = `auth.uid()` AND row references uploader's project |
-| `shop-payment-proofs` | **no** | Slip uploads · private | buyer-only read |
-| `shop-products` | yes | Product images · `<club_slug>/<product_slug>/...` | admin/chair write |
+| Bucket | Public | Size cap | MIME allowlist | RLS pattern |
+|--------|--------|---------|----------------|-------------|
+| `avatars` | yes | 2 MB | jpeg/png/webp | uploader = `auth.uid()` |
+| `clubs-logos` | yes | **2 MB** | **jpeg/png/webp** | admin/chair write |
+| `event-photos` | yes | 10 MB | jpeg/png/webp | uploader must have `event_attendance` row |
+| `ig-thumbnails` | yes | 5 MB | jpeg/png/webp | service-role-only writes |
+| `project-documents` | **no** | 10 MB | jpeg/png/webp/pdf | SELECT scoped to project ownership (uploader · creator · admin · non-draft status). Frontend mints **1-hour signed URLs** via `ProjectDetail.tsx`. |
+| `shop-payment-proofs` | no | **5 MB** | **jpeg/png/webp/pdf** | SELECT scoped per-order: buyer reads own · club president reads only their club's order slips · admin reads all |
+| `shop-products` | yes | 5 MB | jpeg/png/webp | admin/chair write |
 
-Detailed bucket-RLS rules are in `0005_storage_buckets.sql` and `0033_clubs_logos_storage_rls.sql`.
+Detailed bucket-RLS rules are in `0005_storage_buckets.sql`, `0033_clubs_logos_storage_rls.sql`, and `0062_audit_score_10_fixes.sql`.
+
+### Security model (post-0062)
+
+- **Public bucket** = CDN-served, RLS bypassed. URL alone grants access. Used only for low-sensitivity assets (logos, public photos, IG thumbs, profile avatars).
+- **Private bucket** = RLS-enforced. Frontend must call `createSignedUrl(path, ttl)` to issue a short-lived URL. Used for anything bearing PII or financial info (receipts, payment slips).
+- The `shop_proofs_storage_read_chair` policy uses `(storage.foldername(name))[2]::text = o.id::text` to scope per-order rather than per-president-globally — a single chair cannot enumerate other clubs' slips even if they guess paths.
 
 ---
 
@@ -320,15 +337,23 @@ Implementation: `src/pages/ApprovalQueue.tsx` filters by role + next-status. `sr
 
 ```mermaid
 flowchart LR
-    Cron["pg_cron<br/>hourly + 2x daily"] --> Fn["ig-harvest Edge Fn"]
+    Cron["pg_cron<br/>hourly + 2x daily<br/>(x-cron-secret header)"] --> Fn["ig-harvest Edge Fn<br/>dual-gated"]
     Fn -->|fetch profile JSON| IG["instagram.com/&lt;handle&gt;/?__a=1"]
     Fn -->|store metadata| Cache["ig_feed_cache (Postgres)"]
     Fn -->|fetch + reupload thumbnails| Bucket["ig-thumbnails (storage)"]
+    Fn -->|verify| Secret["internal_secrets<br/>cron_secret"]
     SPA["/ ° /clubs ° /clubs/:slug"] -->|read cache| Cache
     SPA --> Bucket
 ```
 
 The function is rate-limit sensitive — IG throttles aggressive scraping. The split 3-schedule design (full sweep hourly + per-handle priority every 6h) was tuned for that.
+
+**Dual auth gate** (0063):
+
+1. `verify_jwt: true` — anon JWT required (handles preflight + CORS sanity).
+2. `x-cron-secret` header — 64-char hex value from `internal_secrets.cron_secret`, baked into each pg_cron `net.http_post` call. Compared in constant time. Fail-CLOSED with 503 if the row is missing.
+
+External callers without the secret receive 401, even if they replay the anon JWT.
 
 ### 9.4 AI chat (FAQ cache → intent classifier → tool calls)
 

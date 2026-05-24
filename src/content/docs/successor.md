@@ -174,6 +174,8 @@ Prefer extending (e.g. adding a new terminal state) over restructuring.
 
 `ig-harvest` scrapes public Instagram profile pages. Instagram rate-limits aggressive crawlers, and a ban affects every handle we track. The current 3-schedule design (hourly full sweep + 6-hourly per-handle priority for `@cuvetsmo` and `@cuvetography`) was tuned by trial; don't crank the frequency without monitoring. If IG changes its public JSON shape (it has happened twice in 2025), expect the function to need a rewrite.
 
+Since 2026-05-24 (migration 0063) the function is **dual-gated**: anon JWT **plus** an `x-cron-secret` header. The secret lives in `public.internal_secrets.cron_secret` (locked to `postgres` + `service_role` only). Migrations 0063 bakes the secret into each `cron.schedule(...)` body via `format()`, so when you re-apply 0063 with `ON CONFLICT DO UPDATE` you rotate the secret and the cron rows together. If you ever see `{"error":"cron_secret_missing"}` 503 responses in `mcp__supabase-cuvetsmo__get_logs`, you've truncated/dropped `internal_secrets` — re-apply 0063.
+
 ### 6.6 LINE notification target
 
 The current `groupId` for `notify-status-change` is **Palm's DM**, not the board group. The switch to the board group is pending nayok 69 buy-in. When you flip it:
