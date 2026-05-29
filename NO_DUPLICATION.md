@@ -32,3 +32,18 @@ The **model is already shared** (both call `ai-chat`), so the brain upgrades tog
 - ai.cuvetsmo.com HAS (port → webcuvetsmo `/chat`): CommandPalette + slash-commands, ModeChips, ArtifactPanel/ComparisonTable, ExampleGallery, Turnstile anti-abuse, i18n switcher, anonymous access.
 - webcuvetsmo `/chat` HAS (port → ai.cuvetsmo.com): Supabase-persisted per-user conversation history + Realtime multi-tab sync, provider/model picker, proposal-drafter pre-fill.
 - Port features both ways — but do NOT propagate the drift items above while doing it.
+
+## 🧠 Single AI brain — model cross-pollination (locked 2026-05-29)
+**Goal (Palm):** upgrade the model ONCE and every surface gets *equal intelligence* at the same instant — no per-app model upgrades.
+
+**Rule:** ALL chat/text intelligence flows through the single **`ai-chat` edge fn** (webcuvetsmo). No surface embeds its own chat model. Upgrading ai-chat's `PROVIDERS` (e.g. Typhoon L0) upgrades every surface simultaneously. The `x-vetos-surface` header changes *scope* (public strips internal SMO data) — never the model.
+
+**✅ Already unified (one brain · equal smarts · proven 2026-05-29):**
+`cuvetsmo.com/chat` (internal) · `ai.cuvetsmo.com` (public) · `cuvetsmo-mcp` vault tools — all call `ai-chat`. One Typhoon upgrade hit all three at once.
+
+**Allowed exceptions (must be declared, like here):**
+- `cuvetsmo-ai/app/local` = on-device WebLLM, **offline mode only** — cannot match the cloud brain by design. Keep, but label it "offline / lighter" in the UI so users know it isn't the full brain.
+- Specialized **non-chat** models (e.g. ASR in `/api/transcribe`) may differ.
+- ⚠️ **TODO (cuvetsmo-ai):** the TEXT routes `/api/translate` + `/api/extract-soap` currently call a model directly — route them through `ai-chat` so they inherit upgrades too. Then *all text intelligence* is truly one-upgrade-fits-all.
+
+**vet-mock** = no LLM (pure exam/SRS engine) — nothing to unify.
