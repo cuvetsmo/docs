@@ -1,49 +1,30 @@
-# Starlight Starter Kit: Basics
+# CUVETSMO Docs
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+Developer wiki **and ecosystem governance hub** for the CUVETSMO platform — published at **[docs.cuvetsmo.com](https://docs.cuvetsmo.com)**. Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
 
-```
-npm create astro@latest -- --template starlight
-```
+## What's here
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+- **[Ecosystem Map](https://docs.cuvetsmo.com/ecosystem/)** — every repo, subdomain, and its locked canonical role. The no-duplication map. **Read this before building anything new.**
+- **Architecture** — system overview, data model, RLS, edge functions, the 16-state approval workflow.
+- **SSO design · Developer onboarding · Succession guide · Changelog.**
 
-## 🚀 Project Structure
+## Governance source files (machine-readable)
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+Kept at the repo root and referenced by each ecosystem repo's `CLAUDE.md`:
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
+- [`REPOS.md`](./REPOS.md) — repo registry
+- [`DOMAINS.md`](./DOMAINS.md) — domain / subdomain map
+- [`NO_DUPLICATION.md`](./NO_DUPLICATION.md) — canonical owners + the single-AI-brain rule
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+> **The rule:** before creating any repo, subdomain, or feature, name the canonical owner repo and the layer (data / protocol / UI / workflow / product). If you can't, don't build it.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+## Commands
 
-Static assets, like favicons, can be placed in the `public/` directory.
+| Command | Action |
+| :-- | :-- |
+| `npm install` | Install dependencies |
+| `npm run dev` | Local dev server at `localhost:4321` |
+| `npm run build` | Build to `./dist/` |
+| `npm run preview` | Preview the build locally |
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+Docs content lives in `src/content/docs/` — each `.md` / `.mdx` becomes a route based on its filename.

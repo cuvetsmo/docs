@@ -5,7 +5,7 @@ import starlight from '@astrojs/starlight';
 const SITE = 'https://docs.cuvetsmo.com';
 const OG_IMAGE = `${SITE}/og.png`;
 const DESCRIPTION =
-	'เอกสารพัฒนา WebCUVETSMO — architecture, developer onboarding, succession guide สำหรับ Vet 87/88/89 และ open-source contributors.';
+	'เอกสารพัฒนาและ governance ของ ecosystem CUVETSMO — ecosystem map, architecture, developer onboarding, succession guide สำหรับ Vet 87/88/89 และ open-source contributors.';
 
 // https://astro.build/config
 export default defineConfig({
@@ -56,6 +56,7 @@ export default defineConfig({
 			},
 			sidebar: [
 				{ label: 'Overview', link: '/' },
+				{ label: 'Ecosystem Map', link: '/ecosystem/' },
 				{
 					label: 'Architecture',
 					items: [
